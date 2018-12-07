@@ -1,37 +1,63 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild, OnChanges } from '@angular/core';
 import { NgForm } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Router, ActivatedRoute } from '@angular/router';
 // import { finalize } from 'rxjs/operators';
 
 import { LoginService } from './login.service';
-
 import { LoginFormModel } from './login-form.model';
+import { GroupService } from './group.service';
+
 
 @Component({
   selector: 'app-login',
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss']
 })
-export class LoginComponent implements OnInit {
+export class LoginComponent implements OnInit, OnChanges {
+  name: string;
+  // baseStyle = {border: '20px red solid'};
+
+  selectedValue: string;
+  selectedCar: string;
 
   @ViewChild('loginForm') loginForm: NgForm;
-
   formModel: LoginFormModel;
   isLoading: boolean;
+  groups = [];
+  // groups = [{
+  //   id: 'A' ,
+  //   value: 'Group A'
+  // }, {
+  //   id: 'B',
+  //   value: 'Group B'
+  //  }
+  // ];
 
-  constructor(
+  constructor (
     private route: ActivatedRoute,
     private router: Router,
     private snackBar: MatSnackBar,
     private loginService: LoginService,
+    private groupService:  GroupService,
+
   ) {
     this.formModel = new LoginFormModel({
-      email: this.route.snapshot.queryParams.email
+      email: this.route.snapshot.queryParams.email,
+      remember: true,
+      group : ''
     });
   }
 
-  ngOnInit() {}
+  ngOnInit() {
+    this.groupService.getGroups().then((response: any) => {
+      this.groups = response.list;
+    });
+  }
+  ngOnChanges(changes: any): void {
+    console.log(this.name);
+
+  }
 
   submit() {
     if (this.loginForm.valid) {
